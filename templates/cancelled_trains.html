@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Cancelled Trains</h2>
+
+  {% if result and result['data'] %}
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Train Number</th>
+          <th>Train Name</th>
+          <th>Start Time</th>
+          <th>Source</th>
+          <th>Destination</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for train in result['data'] %}
+          <tr>
+            <td>{{ train['train_number'] }}</td>
+            <td>{{ train['train_name'] }}</td>
+            <td>{{ train['start_time'] }}</td>
+            <td>{{ train['source_station_name'] }} ({{ train['source_station_code'] }})</td>
+            <td>{{ train['destination_station_name'] }} ({{ train['destination_station_code'] }})</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">
+      No cancelled trains found for the selected date.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

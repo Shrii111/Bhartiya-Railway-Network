@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Train Status</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2 class="mb-4">Live Train Status</h2>
+    <form method="POST" class="mb-4">
+        <label class="form-label">Select Train Number:</label>
+        <select name="train_no" class="form-select" required>
+            <option value="">-- Select Train --</option>
+            <option value="12301">12301 - Rajdhani Express</option>
+            <option value="12002">12002 - Shatabdi Express</option>
+        </select>
+        <label class="form-label mt-3">Select Date:</label>
+        <input type="date" name="date" class="form-control" required>
+        <button type="submit" class="btn btn-primary mt-3">Get Live Status</button>
+    </form>
+    {% if data %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ data['trainName'] }}</h5>
+                <p><strong>Status:</strong> {{ data['currentStation']['stationName'] }} - {{ data['currentStatus'] }}</p>
+                <p><strong>Last Updated:</strong> {{ data['lastUpdatedTime'] }}</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">No live status available.</div>
+    {% endif %}
+</div>
+</body>
+</html>

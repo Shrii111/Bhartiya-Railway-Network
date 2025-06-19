@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Station Updates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2 class="mb-4">Live Station Updates</h2>
+    <form method="POST" class="mb-4">
+        <label class="form-label">Select Station Code:</label>
+        <select name="station_code" class="form-select" required>
+            <option value="">-- Select Station --</option>
+            <option value="NDLS">NDLS - New Delhi</option>
+            <option value="BCT">BCT - Mumbai Central</option>
+        </select>
+        <button type="submit" class="btn btn-primary mt-3">Get Live Trains</button>
+    </form>
+    {% if data %}
+        <ul class="list-group">
+            {% for train in data['trains'] %}
+                <li class="list-group-item">
+                    <strong>{{ train['trainName'] }}</strong> ({{ train['trainNo'] }})<br>
+                    Source: {{ train['sourceStationName'] }} | Destination: {{ train['destinationStationName'] }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-warning">No trains found for this station and time window.</div>
+    {% endif %}
+</div>
+</body>
+</html>

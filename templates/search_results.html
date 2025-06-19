@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Search Results</title></head>
+<body>
+    <h2>Results for "{{ station }}"</h2>
+    {% if results %}
+        <ul>
+        {% for train in results %}
+            <li>{{ train.name }} ({{ train.train_no }}) - {{ train.source }} to {{ train.destination }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No trains found for this station.</p>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+</html>

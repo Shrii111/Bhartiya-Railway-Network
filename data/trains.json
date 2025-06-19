@@ -1,0 +1,18 @@
+[
+    {
+        "train_no": "12345",
+        "name": "Rajdhani Express",
+        "source": "New Delhi",
+        "destination": "Mumbai Central",
+        "departure": "16:00",
+        "arrival": "08:00"
+    },
+    {
+        "train_no": "12456",
+        "name": "Shatabdi Express",
+        "source": "Lucknow",
+        "destination": "New Delhi",
+        "departure": "06:10",
+        "arrival": "12:30"
+    }
+]

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Available Classes for Train</h2>
+
+  {% if result and result['data'] %}
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Class Code</th>
+          <th>Class Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cls in result['data'] %}
+          <tr>
+            <td>{{ cls['classCode'] }}</td>
+            <td>{{ cls['className'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">
+      No data available for this train number. Please check the number and try again.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

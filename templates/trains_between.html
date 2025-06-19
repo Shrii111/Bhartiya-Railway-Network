@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Trains Between</title></head>
+<body>
+    <h2>Trains from {{ source }} to {{ destination }}</h2>
+    {% if trains %}
+        <ul>
+        {% for train in trains %}
+            <li>{{ train.name }} ({{ train.train_no }}) | Departs: {{ train.departure }} | Arrives: {{ train.arrival }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No direct trains found.</p>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+</html>

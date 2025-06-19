@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bhartiya Railway Networking</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; }
+        .section { margin-bottom: 30px; }
+        .card { margin-top: 20px; }
+        .form-group label { font-weight: bold; }
+        small.text-muted { font-size: 85%; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center mb-4">Bhartiya Railway Networking</h2>
+
+    <!-- Live Train Status -->
+    <div class="section">
+        <h4>Live Train Status</h4>
+        <form action="/live_status" method="post">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Train Number</label>
+                    <input type="text" name="train_number" class="form-control" required placeholder="e.g., 12951">
+                    <small class="form-text text-muted">Don’t know the number? Use the “Search Train” form below to find it.</small>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Start Day (0 = Today, 1 = Yesterday, 2 = Day before)</label>
+                    <input type="number" name="start_day" class="form-control" value="0" min="0" max="2">
+                </div>
+            </div>
+            <button class="btn btn-primary">Get Live Status</button>
+        </form>
+
+        {% if live_status_result %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Status: {{ live_status_result }}</h5>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Seat Availability -->
+    <div class="section">
+        <h4>Seat Availability</h4>
+        <form action="/seat_availability" method="post">
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label>Train Number</label>
+                    <input type="text" name="train_no" class="form-control" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Source Station Code</label>
+                    <input type="text" name="source" class="form-control" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Destination Station Code</label>
+                    <input type="text" name="destination" class="form-control" required>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Date (dd-mm-yyyy)</label>
+                    <input type="text" name="date" class="form-control" required>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Class</label>
+                    <input type="text" name="cls" class="form-control" required placeholder="e.g., SL, 3A">
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Quota</label>
+                    <input type="text" name="quota" class="form-control" required placeholder="e.g., GN, LD">
+                </div>
+            </div>
+            <button class="btn btn-primary">Check Availability</button>
+        </form>
+
+        {% if seat_result %}
+        <div class="card mt-3">
+            <div class="card-body">
+                {% if seat_result.get('data') %}
+                <h5>Availability:</h5>
+                <ul>
+                    {% for entry in seat_result['data']['availability'] %}
+                    <li>{{ entry.get('date', '—') }}: {{ entry.get('status', '—') }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="alert alert-warning">
+                    No availability data found. {{ seat_result.get('message', '') }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search Train -->
+    <div class="section">
+        <h4>Search Train</h4>
+        <form action="/search_train_form" method="post">
+            <div class="form-group">
+                <label>Train Name or Number</label>
+                <input type="text" name="train" id="train_autocomplete" class="form-control" required placeholder="e.g., Rajdhani">
+            </div>
+            <button class="btn btn-primary">Search</button>
+        </form>
+
+        {% if train_search_result %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Matching Trains:</h5>
+                <ul>
+                    {% for train in train_search_result.get("data", []) %}
+                    <li>{{ train["train_name"] }} ({{ train["train_number"] }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search Station -->
+    <div class="section">
+        <h4>Search Station</h4>
+        <form action="/search_station_form" method="post">
+            <div class="form-group">
+                <input type="text" name="station" id="station_autocomplete" class="form-control" placeholder="Enter station code or name">
+            </div>
+            <button class="btn btn-secondary">Search</button>
+        </form>
+
+        {% if station_search_result %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Matching Stations:</h5>
+                {% for item in station_search_result.get('data', []) %}
+                <p><strong>{{ item.get('station_code', 'N/A') }}</strong> - {{ item.get('station_name', 'N/A') }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Train Schedule -->
+    <div class="section">
+        <h4>Train Schedule</h4>
+        <form action="/train_schedule" method="post">
+            <div class="form-group">
+                <input type="text" name="train_number" class="form-control" placeholder="Enter train number">
+            </div>
+            <button class="btn btn-secondary">Get Schedule</button>
+        </form>
+
+        {% if train_schedule_result %}
+        <div class="card mt-3">
+            <div class="card-body">
+                {% if train_schedule_result.get('data') %}
+                <h5>{{ train_schedule_result['data'].get('train_name', 'N/A') }} ({{ train_schedule_result['data'].get('train_number', 'N/A') }})</h5>
+                <p>Runs on:</p>
+                <ul>
+                    {% for day, flag in train_schedule_result['data'].get('days', {}).items() %}
+                    <li>{{ day }}: {{ '✓' if flag == 'Y' else '✗' }}</li>
+                    {% endfor %}
+                </ul>
+                <p>Route:</p>
+                <ol>
+                    {% for stop in train_schedule_result['data'].get('route', []) %}
+                    <li>
+                        {{ stop.get('station_name', 'N/A') }} ({{ stop.get('station_code', '') }}) |
+                        Arrive: {{ stop.get('arrive_time', '-') }} |
+                        Depart: {{ stop.get('depart_time', '-') }}
+                    </li>
+                    {% endfor %}
+                </ol>
+                {% else %}
+                <div class="alert alert-warning">No schedule available.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SHORTEST PATH FORM -->
+    <div class="section">
+        <h4>🚆 Find Shortest Path Between Stations</h4>
+        <form action="/shortest_path" method="POST">
+            <div class="form-group">
+                <label for="source">Source Station Code:</label>
+                <input type="text" class="form-control" name="source" placeholder="e.g., NDLS" required>
+            </div>
+            <div class="form-group">
+                <label for="destination">Destination Station Code:</label>
+                <input type="text" class="form-control" name="destination" placeholder="e.g., BJU" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Find Shortest Path</button>
+        </form>
+
+        {% if shortest_path_result %}
+        <div class="mt-3">
+            <h5>🧭 Shortest Path Result:</h5>
+            {% if shortest_path_result.path %}
+            <p><strong>Distance:</strong> {{ shortest_path_result.distance }}</p>
+            <p><strong>Path:</strong> {{ shortest_path_result.path | join(' ➝ ') }}</p>
+            {% else %}
+            <p>{{ shortest_path_result }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <h4>Maximum Flow Between Stations (Ford-Fulkerson)</h4>
+    <form action="/max_flow" method="post">
+        <input type="text" name="source" placeholder="Enter Source Station Code" required>
+        <input type="text" name="destination" placeholder="Enter Destination Station Code" required>
+        <button type="submit">Find Max Flow</button>
+    </form>
+
+    {% if max_flow_result %}
+    <p><strong>Result:</strong> {{ max_flow_result }}</p>
+    {% endif %}
+<!-- 🚩 Google Map with Heatmap & Railway Edges -->
+<h3>🗺️ Live Congestion Heatmap</h3>
+<div id="map" style="height: 500px; width: 100%; border: 1px solid #ccc; margin-bottom: 30px;"></div>
+
+<!-- Map Scripts -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-LAPWYu-Ud2Iq2TdjOFkbXJIpmmd45eQ&libraries=visualization"></script>
+<script>
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 5,
+            center: { lat: 23.2599, lng: 77.4126 },
+            mapTypeId: "roadmap",
+        });
+
+        // --- 📌 HEATMAP DATA ---
+        const heatmapData = [
+            {% for point in congestion_points %}
+                {
+                    location: new google.maps.LatLng({{ point.lat }}, {{ point.lon }}),
+                    weight: {{ point.congestion }}
+                },
+            {% endfor %}
+        ];
+
+        const heatmap = new google.maps.visualization.HeatmapLayer({
+            data: heatmapData,
+            radius: 30,
+            dissipating: true
+        });
+        heatmap.setMap(map);
+
+        // --- 🛤️ RAILWAY EDGES ---
+        const edges = [
+            {% for edge in railway_edges %}
+                {
+                    from: { lat: {{ edge.source.lat }}, lng: {{ edge.source.lng }} },
+                    to: { lat: {{ edge.destination.lat }}, lng: {{ edge.destination.lng }} },
+                    color: "{{ edge.color or '#0000FF' }}"
+                },
+            {% endfor %}
+        ];
+
+        edges.forEach(edge => {
+            const path = new google.maps.Polyline({
+                path: [edge.from, edge.to],
+                strokeColor: edge.color,
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                geodesic: true
+            });
+            path.setMap(map);
+        });
+
+        // --- 📍 STATION MARKERS ---
+        const stationMarkers = [
+            {% for station in station_markers %}
+                {
+                    position: { lat: {{ station.lat }}, lng: {{ station.lng }} },
+                    label: "{{ station.label }}"
+                },
+            {% endfor %}
+        ];
+
+        stationMarkers.forEach(markerData => {
+            new google.maps.Marker({
+                position: markerData.position,
+                label: markerData.label,
+                map: map
+            });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initMap);
+</script>
+
+ <!-- External Help -->
+    <div class="text-center mt-4">
+        <small class="text-muted">
+            Can’t find your train? Try checking <a href="https://enquiry.indianrail.gov.in/ntes" target="_blank">NTES (Indian Railways)</a>
+        </small>
+    </div>
+</div>
+
+<!-- Scripts for autocomplete -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script>
+    $(function () {
+        $("#train_autocomplete").autocomplete({
+            source: "/autocomplete/train",
+            minLength: 2
+        });
+        $("#station_autocomplete").autocomplete({
+            source: "/autocomplete/station",
+            minLength: 2
+        });
+    });
+</script>
+</body>
+</html>
